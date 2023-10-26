@@ -1,4 +1,4 @@
-import { Box, Button, SxProps, TextField, Theme } from '@mui/material';
+import { Alert, Box, Button, Snackbar, SxProps, TextField, Theme } from '@mui/material';
 import React, { ChangeEvent, useState } from 'react';
 import { store } from '../../redux/store';
 import { useDispatch } from 'react-redux';
@@ -24,6 +24,7 @@ const FIB_LENGTH_RANGE = {min: 0, max: 30};
 function ChartSettings() {
     const [rate, setRate] = useState(store.getState().chartSettings.rate);
     const [fibLength, setFibLength] = useState(store.getState().chartSettings.fibLength);
+    const [message, setMessage] = React.useState("");
     const dispatch = useDispatch();
     
     function handleRateChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -35,9 +36,26 @@ function ChartSettings() {
     }
 
     function handleClick() {
-        //TODO add alerts
-        dispatch(setChartSettings({rate, fibLength}));
+        if(isNaN(rate) || isNaN(fibLength)) {
+            setMessage("Что-то пошло не так, будут установлены дефолтные значения");
+            dispatch(setChartSettings({rate: 5, fibLength: 8}));
+        } else if (rate < RATE_RANGE.min || rate > RATE_RANGE.max || fibLength < FIB_LENGTH_RANGE.min || fibLength > FIB_LENGTH_RANGE.max) {
+            setMessage(`Вы вышли за граничные значения (коэффициент ${RATE_RANGE.min} - ${RATE_RANGE.max}; длина ${FIB_LENGTH_RANGE.min} - ${FIB_LENGTH_RANGE.max}), исправьте и попробуйте ещё раз.`);
+        } else if(fibLength % 1 > 0) {
+            setMessage("Длина округлена до целых значений");
+            dispatch(setChartSettings({rate, fibLength: Math.round(fibLength)}));
+            setFibLength(Math.round(fibLength));
+        } else {
+            dispatch(setChartSettings({rate, fibLength}));
+        }
     }
+
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+        setMessage("");
+      };
     
     return (
         <Box sx={sx} className="chart-settings">
@@ -64,6 +82,11 @@ function ChartSettings() {
                 }}
             />
             <Button variant="contained" onClick={handleClick}>{"Применить"}</Button>
+            <Snackbar open={!!message} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="info" >
+                    {message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

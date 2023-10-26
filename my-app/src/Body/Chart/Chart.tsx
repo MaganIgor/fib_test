@@ -52,7 +52,7 @@ function Chart() {
     }, [chartSettings])
     return (
         <Box sx={sx} ref={containerRef} className="chart">
-            <canvas width={1000} height={1000} ref={canvasRef}/>
+            <canvas ref={canvasRef}/>
         </Box>
     );
 }
