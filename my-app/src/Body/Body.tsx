@@ -4,10 +4,10 @@ import Chart from './Chart/Chart';
 import ChartSettings from './ChartSettings/ChartSettings';
 
 const sx: SxProps<Theme> = {
-    padding: "10px",
     flexGrow: 1,
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    overflow: "hidden"
 }
 
 function Body() {
